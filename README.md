@@ -3,7 +3,7 @@ A "very stupid" companion app that only understand "how are you" and "say <somet
 
 A Siri clone?
 
-Language available in English and 粤语 (Cantonese).
+Language available in English and 粤语 (Cantonese). Press the title to switch.
 
 Press Microphone button to start
 
