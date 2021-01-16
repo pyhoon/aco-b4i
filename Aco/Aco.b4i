@@ -1,0 +1,234 @@
+﻿Build1=Default,com.puterise.aco.b4i
+File1=1.bil
+FileGroup1=Default Group
+Group=Default Group
+Library1=icore
+Library2=iphone
+Library3=ispeechrecognition
+NumberOfFiles=1
+NumberOfLibraries=3
+NumberOfModules=0
+Version=6.8
+@EndOfDesignText@
+'Code module
+#Region  Project Attributes 
+	#ApplicationLabel: Aco
+	#Version: 1.0.3
+	'Orientation possible values: Portrait, LandscapeLeft, LandscapeRight and PortraitUpsideDown
+	#iPhoneOrientations: Portrait, LandscapeLeft, LandscapeRight
+	#iPadOrientations: Portrait, LandscapeLeft, LandscapeRight, PortraitUpsideDown
+	#Target: iPhone, iPad
+	#ATSEnabled: True
+	#MinVersion: 10
+	#PlistExtra:<key>NSSpeechRecognitionUsageDescription</key><string>Listen to voice input and return corresponding output</string>
+	#PlistExtra:<key>NSMicrophoneUsageDescription</key><string>Speech recognition</string>
+	' Ignore Dark Mode For XCode 11
+	 #PlistExtra: <key>UIUserInterfaceStyle</key><string>Light</string>
+	#If RELEASE
+	#CertificateFile: ios_distribution.cer
+	#ProvisionFile: aco_store.mobileprovision
+	#Else
+	#CertificateFile: ios_development.cer
+	#ProvisionFile: development.mobileprovision
+	#End If
+	#IgnoreWarnings: 32
+#End Region
+
+Sub Process_Globals
+	Public App As Application
+	Public NavControl As NavigationController
+	Private Page1 As Page
+	Private lblText As Label
+	Private speech As SpeechRecognition
+	Private ActivityIndicator1 As ActivityIndicator
+	Private btnStart As Button
+	Private btnLanguage As Button
+	Dim TTS As TTS	
+	Dim lang As String
+	Dim strText As String	
+End Sub
+
+Private Sub Application_Start (Nav As NavigationController)
+	'SetDebugAutoFlushLogs(True) 'Uncomment if program crashes before all logs are printed.
+	NavControl = Nav	
+	Page1.Initialize("Page1")
+	Page1.RootPanel.LoadLayout("1")
+	NavControl.ShowPage(Page1)
+	NavControl.NavigationBarVisible = False
+	speech.Initialize("Speech")	
+	TTS.Initialize("TTS")
+	'TTS.Pitch = 1.0
+	TTS.SpeechRate = 0.5
+	btnLanguage.Text = "English"
+End Sub
+
+Sub Speech_AuthorizationStatusChanged (Status As Int)
+	If speech.IsAuthorized Then
+		If speech.SupportedLanguages.IndexOf(speech.DefaultLanguage) > -1 Then
+			lang = speech.DefaultLanguage
+		Else
+			lang = "en"
+			btnLanguage.Text = "English"
+		End If
+		SetLanguage
+	Else
+		lblText.Text = "Not authorized..."
+	End If
+End Sub
+
+Sub SetLanguage
+	If speech.SetLanguage(lang) = False Then
+		lblText.TextColor = Colors.Red
+		lblText.Text = "Speech Recognition not available."
+	Else
+		'btnLanguage.Text = lang
+		'Page1.Title = $"Speech Recognition (${lang})"$
+		lblText.TextColor = Colors.RGB(50, 205, 50)		
+		If lang = "zh" Then
+			lblText.Text = "準備!"
+			btnLanguage.Text = "粵語"
+		Else
+			lblText.Text = "Ready!"
+			btnLanguage.Text = "English"
+		End If
+		SetState(True)
+	End If
+End Sub
+
+Sub SetState (Ready As Boolean)
+	btnStart.Enabled = Ready
+	btnStart.Visible = Ready
+	'btnStop.Enabled = Not(Ready)
+	ActivityIndicator1.Visible = Not(Ready)
+End Sub
+
+Sub btnStart_Click
+	SetCategory(False)
+	PlayBeep
+	Sleep(1000)	
+	SetCategory(True)
+	lblText.TextColor = Colors.RGB(50, 205, 50)
+	If lang = "zh" Then		
+		lblText.Text = "正在聽..."
+	Else
+		lblText.Text = "Listening..."
+	End If
+	speech.StartRecording(True) 'report partial results
+	SetState(False)
+	Sleep(3000)
+	speech.StopRecording
+End Sub
+
+Sub btnLanguage_Click
+	If lang = "zh" Then
+		lang = "en"
+		btnLanguage.Text = "English"
+	Else
+		lang = "zh"
+		btnLanguage.Text = "粵語"
+	End If
+	'btnLanguage.Text = lang
+	SetLanguage
+End Sub
+
+Sub Speech_Result (Success As Boolean, IsFinal As Boolean, Texts As List)
+	lblText.TextColor = Colors.Red
+	If Success Then
+		lblText.Text = Texts.Get(0)
+		'Log(Texts)
+		Log(lblText.Text)
+		If IsFinal Then
+			SetState(True)
+			SetCategory(False)
+			SpeakText
+		End If
+	Else
+		SetState(True)
+		Log(LastException.Message)
+		lblText.Text = ""
+		'lblText.Text = "Error: " & LastException
+	End If
+End Sub
+
+Sub SpeakText
+	If lang = "zh" Then ' "\U4f60\U597d\U55ce"
+		If TTS.SetLanguage("zh-HK") Then
+			If lblText.Text.Contains("你好嗎") Then
+				strText = "我好呀, 多謝關心!"
+			Else If lblText.Text.StartsWith("講") Then
+				strText = lblText.Text.Replace("講", "")
+			Else
+				strText = "對唔住, 我唔明白你講乜嘢!"
+			End If
+			lblText.TextColor = Colors.RGB(30, 144, 255)
+			lblText.Text = strText
+			TTS.Speak(strText, False)
+			'TTS.Stop
+		Else
+			Log("TTS.SetLanguage failed")
+			lblText.TextColor = Colors.Red
+			lblText.Text = "Text To Speech not available."
+		End If
+	Else
+		If TTS.SetLanguage("en-US") Then
+			If lblText.Text.ToLowerCase.Contains("how are you") Then
+				strText = "I am fine. Thank you!"
+			Else If lblText.Text.StartsWith("Say ") Then
+				strText = lblText.Text.Replace("Say ", "")
+			Else
+				strText = "Sorry, I don't understand what you're saying!"
+			End If
+			lblText.TextColor = Colors.RGB(30, 144, 255)
+			lblText.Text = strText
+			TTS.Speak(strText, False)
+		Else
+			Log("TTS.SetLanguage failed")
+			lblText.TextColor = Colors.Red
+			lblText.Text = "Text To Speech not available."
+		End If
+	End If
+End Sub
+
+'When using TTS use Record(False)
+Sub SetCategory(Record As Boolean)
+	Dim NaObj As NativeObject = Me
+	NaObj.RunMethod("setCategory:",Array(Record))
+	
+	#If OBJC
+	-(void)setCategory:(BOOL)B{
+		AVAudioSession* AS = [AVAudioSession sharedInstance];
+		if (B){
+			[AS setCategory:AVAudioSessionCategoryRecord error:nil];
+    		[AS setMode:AVAudioSessionModeMeasurement error:nil];
+    		[AS setActive:true withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation error:nil];
+		}else{
+    		[AS setCategory:AVAudioSessionCategoryPlayback error:nil];
+    		[AS setMode:AVAudioSessionModeDefault error:nil];
+		}
+	}
+	#End If
+End Sub
+
+Sub TTS_Complete(Text As String)
+	Log("TTS: " & Text)
+End Sub
+
+Private Sub Page1_Resize(Width As Int, Height As Int)
+	
+End Sub
+
+Private Sub Application_Background
+	
+End Sub
+
+Sub PlayBeep
+	Dim NativeMe As NativeObject = Me
+	NativeMe.RunMethod("beep", Null)
+End Sub
+
+#If ObjC
+#import <AVFoundation/AVAudioPlayer.h>
+- (void) beep {
+  AudioServicesPlaySystemSound(1300);
+}
+#End If
