@@ -7,6 +7,11 @@ Language available in English and 粤语 (Cantonese).
 
 Press Microphone button to start
 
+**Preview:**
+
+<img src="https://github.com/pyhoon/aco-b4i/blob/main/Preview/en.png" title="English" height="400" /> &nbsp; 
+<img src="https://github.com/pyhoon/aco-b4i/blob/main/Preview/zh.png" title="Cantonese" height="400" />
+
 # English
 
 Aco (Ready!)
@@ -51,3 +56,7 @@ Aco (正在聼...)
 You: "講乜嘢"
 
 Aco: "乜嘢"
+
+Made with ❤ in B4X
+
+Develop iOS app with [B4i](https://www.idevaffiliate.com/33168/7.html)
