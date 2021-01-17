@@ -1,5 +1,5 @@
 # aco-b4i
-A "very stupid" companion app that only understand "how are you" and "say <something>".
+A "very stupid" companion app that only understand "how are you" and "say ???".
 
 A Siri clone?
 
@@ -11,6 +11,8 @@ Press Microphone button to start
 
 <img src="https://github.com/pyhoon/aco-b4i/blob/main/Preview/en.png" title="English" height="400" /> &nbsp; 
 <img src="https://github.com/pyhoon/aco-b4i/blob/main/Preview/zh.png" title="Cantonese" height="400" />
+
+[![Video](https://i.ytimg.com/vi/P8XgrSe0Qik/hqdefault.jpg)](https://www.youtube.com/watch?v=P8XgrSe0Qik)
 
 # English
 
