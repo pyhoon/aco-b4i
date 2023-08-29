@@ -61,4 +61,4 @@ Aco: "乜嘢"
 
 Made with ❤ in B4X
 
-Develop iOS app with [B4i](https://www.idevaffiliate.com/33168/7.html)
+Develop iOS app with [B4i](https://www.b4x.com/b4i.html)
